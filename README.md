@@ -21,6 +21,8 @@ Microservices written using steroids can be ported across different platforms su
 When the data volume of a particular microservice increases to a bigger scale it would be necessary to move to a more scalable database. Steroids framework consists of a plug-in based design which makes it capable of integrating with a new database or caching technology. 
 
 
+
+
 # Conceptual Architecture
 
 A technology-free architecture of Steroids framework which shows the high level components is as follows;
@@ -36,6 +38,9 @@ Steroids library enables the developer to write services in a synchronous declar
 
 # Steroids Programming Model
 Steroids programming model follows a synchronous programming model in TypeScript. It makes use of JavaScript coding patterns such as method chaining, and ES6 'async' and 'await' keywords to avoid asynchronous style of a programming model. Therefore Services written using Steroids Framework avoids the callback hell anti pattern. In addition the code becomes more readable, maintainable and compact.
+
+![alt text](https://raw.githubusercontent.com/99xt/steroidslibrary/master/doc/image_architecture.png)
+
 
 ## Programming Model
 
@@ -58,6 +63,7 @@ A Steroids Service should inherit the abstract class AbstactService and implemen
 
 A 'Steroid' object passed for this method consists of reusable features that are commonly used by a microservice developer such as Relational Database access, Caching, Object Transforming, Logging,etc... For example a query in a relational database can be executed using the 'Steroid' object. Mapping the resulting rows to JSON objects is automatically handled by the Steroids framework. No O-R mapping is required.
 
+
 Calling a Database
 ```typescript
 class Property //the class we need to map the query result
@@ -71,6 +77,9 @@ let query =  "SELECT * FROM Plot p WHERE p.EdokNumber = '123'"; //the query that
 let properties:Property = await steroid.database().relational().executeQuery(Property,query); //execute the query using steroids
 ```
 
+![alt text](https://raw.githubusercontent.com/99xt/steroidslibrary/master/doc/image_model.png)
+
+
 The reusable components in steroids can be accessed using a method chain.
 The first method represents the category of the resources that are available in steroids. For example the database() method returns the type of databases that can be used, the mapper() method returns features to transform a JSON object. Feature represents the actual function the developer needs to access, and the feature parameters represents the parameters that is required for that particular feature.
 
@@ -78,6 +87,7 @@ The first method represents the category of the resources that are available in 
 ## Using ES7 async and await Keywords
 
 Steroids avoid anti patterns such as callback hells and eliminates asynchronous style of coding using async and await keywords. Non-blocking method calls in steroids that require Javascript callbacks or promises, are replaced by 'async' and 'await' keywords.  An example of a non-blocking method call is a executing a query in a database. The following code shows an example of querying from a database.
+
 
 ES7 async and await
 ```typescript
@@ -98,6 +108,8 @@ export class SampleSteroidService extends AbstractService {
  
 }
 ```
+
+
 
 # Licencing
 

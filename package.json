@@ -1,7 +1,7 @@
 {
   "name": "steroidslibrary",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Steroids - A TypesScript Framework for REST APIs",
   "directories": {
     "test": "tests"
   },
@@ -10,9 +10,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://supund@bitbucket.org/boligmappaplatformteam/steroidslibrary.git"
+    "url": "https://github.com/99xt/steroidslibrary.git"
   },
-  "author": "",
-  "license": "ISC",
-  "homepage": "https://bitbucket.org/boligmappaplatformteam/steroidslibrary#readme"
+  "author": "Supun Dissanayake",
+  "license": "MIT",
+  "homepage": "https://github.com/99xt/steroidslibrary.git#readme"
 }

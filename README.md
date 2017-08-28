@@ -27,6 +27,8 @@ When the data volume of a particular microservice increases to a bigger scale it
 
 A technology-free architecture of Steroids framework which shows the high level components is as follows;
 
+![alt text](https://raw.githubusercontent.com/99xt/steroidslibrary/master/doc/image_architecture.png)
+
 ## Service Container:
 Service container refers to the environment where the business logic (Steroids Services) is hosted. The purpose of the Service Container is to expose the steroids services as REST endpoints which can be consumed by 3rd party applications. The container could be either AWS Lambda or Stereoids Runtime which can be used to host Steroids service either in a Docker or in a cloud instance such as a EC2. 
 
@@ -39,7 +41,6 @@ Steroids library enables the developer to write services in a synchronous declar
 # Steroids Programming Model
 Steroids programming model follows a synchronous programming model in TypeScript. It makes use of JavaScript coding patterns such as method chaining, and ES6 'async' and 'await' keywords to avoid asynchronous style of a programming model. Therefore Services written using Steroids Framework avoids the callback hell anti pattern. In addition the code becomes more readable, maintainable and compact.
 
-![alt text](https://raw.githubusercontent.com/99xt/steroidslibrary/master/doc/image_architecture.png)
 
 
 ## Programming Model

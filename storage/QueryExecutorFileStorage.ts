@@ -30,7 +30,20 @@ export class QueryExecutorFileStorage implements IFileStorage{
                 "Authorization" : this._config.database.settings.authToken
             }
 
-            requestor.getFull<any>(this._config.storage.settings.url +"/" + id ,headers)
+            let className,idValue
+            
+            if (id.includes(".")){
+                let splitData = id.split(".");
+                className = splitData[0];
+                splitData.shift();
+                idValue = splitData.join("/");
+            }else {
+                className = "";
+                idValue = id;
+            }
+
+
+            requestor.getFull<any>(this._config.storage.settings.url +"/" + className  +"/" + idValue ,headers)
             .then(function(result){
                 let response = {
                     name:"",

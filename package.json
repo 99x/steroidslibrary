@@ -1,6 +1,6 @@
 {
   "name": "steroidslibrary",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Steroids - A TypesScript Framework for REST APIs",
   "directories": {
     "test": "tests"

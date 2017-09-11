@@ -193,6 +193,10 @@ export class Steroid {
             },
             returnRawJson:()=>{
                 self._extraSettings.canReturnWithoutStringify = true;
+            },
+            triggerCallback:(result:any)=>{
+                let response = Composer.compose(self,result);
+                self._callback(undefined,response);
             }
         }
     }

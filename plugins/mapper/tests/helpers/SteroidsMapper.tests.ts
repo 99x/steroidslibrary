@@ -3,7 +3,11 @@ declare function require(module:string):any;
 declare let console:any;
 let assert = require("assert");
 
-import {MapOps,AppendOps, SteroidsMapper, SteroidMapperException} from "../../helpers/SteroidsMapper"
+import {SteroidsMapper} from "../../SteroidsMapper"
+import {SteroidMapperException} from "../../SteroidMapperException"
+import {MapOps} from "../../Map"
+import {AppendOps} from "../../Append"
+
 
 describe("Component : Steroids Mapper", () => {
     

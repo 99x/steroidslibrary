@@ -1,15 +1,18 @@
 import {IEvent, ICallback, Composer} from "./Messages"
 import {Config} from "./Config"
 import {ActivityLogger,LogType} from "./ActivityLogger"
-import {IFileStorage} from "./storage/IFileStorage"
-import {IRelationalDatabase} from "./data/IRelationalDatabase"
-import {ICacheDatabase} from "./data/ICacheDatabase"
-import {RelationalDatabaseFactory} from "./data/RelationalDatabaseFactory"
-import {FileStorageFactory} from "./storage/FileStorageFactory"
-import {SteroidsMapper} from "./helpers/SteroidsMapper"
+import {SteroidsMapper} from "./plugins/mapper/SteroidsMapper"
 import {AsyncIterator} from "./helpers/AsyncIterator"
 import {Validator} from "./helpers/Validator"
 import {ServiceInvoker} from "./ServiceInvoker"
+
+import {IFileStorage} from "./plugins/storage/IFileStorage"
+import {FileStorageFactory} from "./plugins/storage/FileStorageFactory"
+
+import {IRelationalDatabase} from "./plugins/data/relational/IRelationalDatabase"
+import {RelationalDatabaseFactory} from "./plugins/data/relational/RelationalDatabaseFactory"
+
+import {ICacheDatabase} from "./plugins/data/cache/ICacheDatabase"
 
 export interface IDatabaseProvider
 {

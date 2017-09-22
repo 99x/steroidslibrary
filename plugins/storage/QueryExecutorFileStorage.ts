@@ -1,5 +1,5 @@
-import {Steroid} from "../Steroids"
-import {RestRequestor} from "../helpers/RestRequestor"
+import {Steroid} from "../../Steroids"
+import {RestRequestor} from "../../helpers/RestRequestor"
 import {IFileStorage,IFileData} from "./IFileStorage"
 
 interface QueryRequest{

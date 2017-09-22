@@ -1,5 +1,8 @@
-import {TestRunner, scenario, outcome, feature, jiraTask } from "../../TestRunner"
-import {MapOps,AppendOps, SteroidsMapper, SteroidMapperException} from "../../helpers/SteroidsMapper"
+import {TestRunner, scenario, outcome, feature, jiraTask } from "../../../../TestRunner"
+import {SteroidsMapper} from "../../SteroidsMapper"
+import {SteroidMapperException} from "../../SteroidMapperException"
+import {MapOps} from "../../Map"
+import {AppendOps} from "../../Append"
 
 declare function require(module:string):any;
 let assert = require("assert");

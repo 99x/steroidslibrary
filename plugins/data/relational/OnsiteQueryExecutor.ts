@@ -1,6 +1,6 @@
 import {IRelationalDatabase} from "./IRelationalDatabase"
-import {RestRequestor} from "../helpers/RestRequestor"
-import {Steroid} from "../Steroids"
+import {RestRequestor} from "../../../helpers/RestRequestor"
+import {Steroid} from "../../../Steroids"
 
 interface QueryRequest{
     Query:string,

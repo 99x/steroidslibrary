@@ -1,4 +1,4 @@
-import {IRelationalDatabase} from "./IRelationalDatabase"
+import {IRelationalDatabase, IRetrievalPlan} from "./IRelationalDatabase"
 import {Steroid} from "../../../Steroids"
 import {ValueRetriever} from "../../../helpers/ValueRetriever";
 
@@ -61,6 +61,85 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
             });
             return this._connection;
         }
+    }
+
+    getDataSet(retrievalPlan:IRetrievalPlan[]):Promise<any> {
+        let responseDataSet = {};
+        let sequelize = this.getConnection();
+        return new Promise<any>((resolve,reject)=>{
+            this.executeRetrievalUnit(retrievalPlan,responseDataSet,{},sequelize)
+            .then((result)=>{
+                resolve(responseDataSet);
+            })
+            .catch((err)=>{
+                reject(err);
+            })
+        })
+        
+    }
+
+    private executeRetrievalUnit(retrievalPlans: IRetrievalPlan[], responseDataSet, inputSet, sequelize):Promise<any>{        
+        let promiseArray = [];
+
+        for (let i=0;i<retrievalPlans.length;i++){
+            let plan:IRetrievalPlan = retrievalPlans[i];
+            let promiseObj;
+            if (plan.subDataSets)
+                promiseObj = this.executeWithSubDataSets(plan, sequelize, responseDataSet, inputSet);
+            else
+                promiseObj = this.executeSingleUnit(plan, sequelize, responseDataSet, inputSet);
+            
+            promiseArray.push(promiseObj);
+        }
+
+        return Promise.all(promiseArray);
+    }
+
+    private async executeSingleUnit(plan:IRetrievalPlan,sequelize,responseDataSet, inputSet): Promise<any>{
+        return new Promise<any>((resolve,reject)=>{
+
+            let query = plan.query;
+            for(let key in inputSet){
+                let val = inputSet[key];
+                query = query.replace("{{" + key + "}}", val);
+            }
+
+            this.executeQuery(Object,query)
+            .then((queryResult)=>{
+                responseDataSet[plan.dataSetName] = queryResult;
+                resolve(queryResult);
+            })
+            .catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    private executeWithSubDataSets(plan:IRetrievalPlan,sequelize,responseDataSet, inputSet): Promise<any>{
+        return new Promise<any>((resolve,reject)=>{
+            this.executeSingleUnit(plan, sequelize,responseDataSet, inputSet)
+            .then((result)=>{
+                let newInputSet = {};
+
+                for (let i=0;i<plan.postProcessors.length;i++){
+                    let processor = plan.postProcessors[i];
+                    let inVals = result.map(processor.func).filter(x => x);
+                    let csv = inVals.join(",");
+                    newInputSet[processor.name] = csv;
+                }
+
+                this.executeRetrievalUnit(plan.subDataSets, responseDataSet,newInputSet, sequelize)
+                .then((result)=>{
+                    resolve(result);
+                })
+                .catch((result)=>{
+                    reject(result);
+                });
+            })
+            .catch((err)=>{
+                reject(err);
+            });
+        });
     }
 
     constructor(steroid: Steroid){

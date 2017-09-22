@@ -1,4 +1,4 @@
-import {IRelationalDatabase} from "./IRelationalDatabase"
+import {IRelationalDatabase, IRetrievalPlan} from "./IRelationalDatabase"
 import {RestRequestor} from "../../../helpers/RestRequestor"
 import {Steroid} from "../../../Steroids"
 
@@ -44,6 +44,12 @@ export class OnsiteQueryExecutor implements IRelationalDatabase {
             });
         });
 
+    }
+
+    getDataSet(retrievalPlan:IRetrievalPlan[]):Promise<any> {
+        return new Promise<any>((resolve,reject)=>{
+            resolve({});
+        });
     }
 
     constructor(steroid: Steroid){

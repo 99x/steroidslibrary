@@ -18,6 +18,7 @@ export class JoinOps {
     public on(mainObjectField:string, dataSetField:string){
         this._currentConfig.mainField = mainObjectField;
         this._currentConfig.dataSetField = dataSetField;
+        return this;
     }   
 
     public to(...fields:string[]){
@@ -38,7 +39,7 @@ export class JoinOps {
             joinObjs = [this._obj];
 
         
-        for (let i=0;i<joinObjs;i++){
+        for (let i=0;i<joinObjs.length;i++){
             let mainObj = joinObjs[i];
 
             for (let j=0;j<this._joinConfigs.length;j++){

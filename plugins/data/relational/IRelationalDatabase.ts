@@ -3,15 +3,17 @@ export interface IRelationalDatabase {
     getDataSet(retrievalPlan:IRetrievalPlan[]):Promise<any>;
 }
 
-export interface IRetrievalParameter {
+export interface IVariables {
     name:string,
-    func: Function
+    value?: any,
+    values?: any
 }
 
 export interface IRetrievalPlan {
     dataSetName:string,
     query:string,
-    postProcessors?:IRetrievalParameter[],
+    cancelIfEmpty?:string[],
+    variables?:IVariables[],
     subDataSets?: IRetrievalPlan[]
 }
 
@@ -21,9 +23,9 @@ let x:IRetrievalPlan = {
     subDataSets:[{
         query:"",
         dataSetName:"subset",
-        postProcessors:[{
+        variables:[{
             name:"s",
-            func: ()=>{}
+            values: ()=>{}
         }]
     }]
 }

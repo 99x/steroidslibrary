@@ -104,6 +104,15 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
                 query = query.replace("{{" + key + "}}", val);
             }
 
+            if (plan.cancelIfEmpty){
+                for (let i=0;i<plan.cancelIfEmpty.length;i++)
+                if (!inputSet[plan.cancelIfEmpty[i]]){
+                    let result = [];
+                    responseDataSet[plan.dataSetName] = result;
+                    resolve(result);
+                }
+            }
+
             this.executeQuery(Object,query)
             .then((queryResult)=>{
                 responseDataSet[plan.dataSetName] = queryResult;
@@ -121,11 +130,23 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
             .then((result)=>{
                 let newInputSet = {};
 
-                for (let i=0;i<plan.postProcessors.length;i++){
-                    let processor = plan.postProcessors[i];
-                    let inVals = result.map(processor.func).filter(x => x);
-                    let csv = inVals.join(",");
-                    newInputSet[processor.name] = csv;
+                for (let i=0;i<plan.variables.length;i++){
+                    let processor = plan.variables[i];
+                    let finalValue;
+                    if (processor.value){
+                        if (typeof processor.value == "function"){
+                            if (result.length > 0){
+                                finalValue = [result[0]].map(processor.value)[0];
+                            }
+                            
+                        }else 
+                            finalValue = processor.value;
+                    }else if (processor.values){
+                        let inVals = result.map(processor.values).filter(x => x);
+                        finalValue = inVals.join(",");
+                    }
+
+                    newInputSet[processor.name] = finalValue;
                 }
 
                 this.executeRetrievalUnit(plan.subDataSets, responseDataSet,newInputSet, sequelize)

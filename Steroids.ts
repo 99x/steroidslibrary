@@ -1,15 +1,18 @@
 import {IEvent, ICallback, Composer} from "./Messages"
 import {Config} from "./Config"
 import {ActivityLogger,LogType} from "./ActivityLogger"
-import {IFileStorage} from "./storage/IFileStorage"
-import {IRelationalDatabase} from "./data/IRelationalDatabase"
-import {ICacheDatabase} from "./data/ICacheDatabase"
-import {RelationalDatabaseFactory} from "./data/RelationalDatabaseFactory"
-import {FileStorageFactory} from "./storage/FileStorageFactory"
-import {SteroidsMapper} from "./helpers/SteroidsMapper"
+import {SteroidsMapper} from "./plugins/mapper/SteroidsMapper"
 import {AsyncIterator} from "./helpers/AsyncIterator"
 import {Validator} from "./helpers/Validator"
 import {ServiceInvoker} from "./ServiceInvoker"
+
+import {IFileStorage} from "./plugins/storage/IFileStorage"
+import {FileStorageFactory} from "./plugins/storage/FileStorageFactory"
+
+import {IRelationalDatabase} from "./plugins/data/relational/IRelationalDatabase"
+import {RelationalDatabaseFactory} from "./plugins/data/relational/RelationalDatabaseFactory"
+
+import {ICacheDatabase} from "./plugins/data/cache/ICacheDatabase"
 
 export interface IDatabaseProvider
 {
@@ -19,6 +22,15 @@ export interface IDatabaseProvider
 
 export interface IStorageProvider {
     file():IFileStorage
+}
+
+export interface ISteroidResponse {
+    httpCode?: string,
+    httpHeaders?:any,
+    message?:string,
+    success:boolean,
+    code:number,
+    response: any
 }
 
 declare let console:any;
@@ -197,6 +209,18 @@ export class Steroid {
             triggerCallback:(result:any)=>{
                 let response = Composer.compose(self,result);
                 self._callback(undefined,response);
+            },
+            setResponse:function(response:ISteroidResponse){
+                self.responseParams.success = response.success;
+                self.responseParams.code = response.code;
+                if (response.httpCode)
+                    self._contextObj.statusCode = response.httpCode;
+                if (response.httpHeaders)
+                    this.setHttpHeaders(response.httpHeaders);
+                if (response.message)
+                    this.setMessage(response.message);
+
+                return response.response;
             }
         }
     }

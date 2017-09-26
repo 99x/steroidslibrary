@@ -24,6 +24,15 @@ export interface IStorageProvider {
     file():IFileStorage
 }
 
+export interface ISteroidResponse {
+    httpCode?: string,
+    httpHeaders?:any,
+    message?:string,
+    success:boolean,
+    code:number,
+    response: any
+}
+
 declare let console:any;
 declare function require(moduleName:string):any;
 
@@ -200,6 +209,18 @@ export class Steroid {
             triggerCallback:(result:any)=>{
                 let response = Composer.compose(self,result);
                 self._callback(undefined,response);
+            },
+            setResponse:function(response:ISteroidResponse){
+                self.responseParams.success = response.success;
+                self.responseParams.code = response.code;
+                if (response.httpCode)
+                    self._contextObj.statusCode = response.httpCode;
+                if (response.httpHeaders)
+                    this.setHttpHeaders(response.httpHeaders);
+                if (response.message)
+                    this.setMessage(response.message);
+
+                return response.response;
             }
         }
     }

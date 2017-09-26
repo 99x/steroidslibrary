@@ -124,7 +124,7 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
         });
     }
 
-    private executeWithSubDataSets(plan:IRetrievalPlan,sequelize,responseDataSet, inputSet): Promise<any>{
+    private async executeWithSubDataSets(plan:IRetrievalPlan,sequelize,responseDataSet, inputSet): Promise<any>{
         return new Promise<any>((resolve,reject)=>{
             this.executeSingleUnit(plan, sequelize,responseDataSet, inputSet)
             .then((result)=>{
@@ -158,6 +158,76 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
                 });
             })
             .catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+
+    private divideDataSets(result,dataSetNames){
+        let currentDataSet = undefined;
+        let currentIndex = -1;
+        let generatedIndex = -1;
+        let dataSets = {};
+        let prevColumns = undefined;
+        
+        for (let i=0;i<result.length;i++){
+            let obj = result[i];
+            let currentColumns = [];
+            
+            for (let pKey in currentColumns)
+                currentColumns.push(pKey);
+            
+            currentColumns = currentColumns.sort();
+
+            let isEqual = false;
+
+            if (prevColumns){
+                let isOk = true;
+                if (prevColumns.length == currentColumns.length){
+                    for (let i=0;i<prevColumns.length;i++)
+                    if (prevColumns[i] != currentColumns){
+                        isOk = false;
+                        break;
+                    }
+                }
+                isEqual = isOk;
+            }
+
+            prevColumns = currentColumns;
+
+            if (!isEqual){
+                currentIndex++;
+                currentDataSet = undefined;
+                if (dataSetNames)
+                if (dataSetNames[currentIndex])
+                    currentDataSet = dataSetNames[currentIndex];
+
+                if (!currentDataSet){
+                    generatedIndex++;
+                    currentDataSet = "untitled"  + generatedIndex;
+                }
+
+                dataSets[currentDataSet] = [];
+            }
+
+            dataSets[currentDataSet].push(obj);
+            
+        }
+
+        return dataSets;
+    }
+
+    getMultipleResultSets(query:string, ...dataSetNames:string[]):Promise<any>{
+        return new Promise<any>((resolve,reject)=>{
+            this.executeQuery(Object,query)
+            .then((res)=>{
+                try{
+                    resolve(this.divideDataSets(res,dataSetNames));
+                }catch (e){
+                    reject(e);
+                }
+            }).catch((err)=>{
                 reject(err);
             });
         });

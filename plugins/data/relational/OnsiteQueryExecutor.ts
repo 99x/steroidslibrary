@@ -52,6 +52,12 @@ export class OnsiteQueryExecutor implements IRelationalDatabase {
         });
     }
 
+    getMultipleResultSets(query:string, ...dataSetNames:string[]):Promise<any>{
+        return new Promise<any>((resolve,reject)=>{
+            resolve({});
+        });
+    }
+
     constructor(steroid: Steroid){
         this._steroid = steroid;
         this._config = steroid.config;

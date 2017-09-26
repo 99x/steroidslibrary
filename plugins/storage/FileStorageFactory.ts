@@ -1,6 +1,6 @@
 import {IFileStorage} from "./IFileStorage";
 import {QueryExecutorFileStorage} from "./QueryExecutorFileStorage";
-import {Steroid} from "../Steroids";
+import {Steroid} from "../../Steroids";
 
 export class FileStorageFactory {
     public static create(steroid:Steroid) : IFileStorage {

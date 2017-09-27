@@ -53,11 +53,12 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
             return this._connection;            
         else {
             let Sequelize = require("sequelize");
-            let {driver, database, host, username, password, pool} = this._config;
+            let {driver, database, host, username, password, pool, dialectOptions} = this._config;
             this._connection = new Sequelize(database, username, password, {
                 host: host,
                 dialect: driver,
-                pool: pool
+                pool: pool,
+                dialectOptions: dialectOptions
             });
             return this._connection;
         }
@@ -175,7 +176,7 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
             let obj = result[i];
             let currentColumns = [];
             
-            for (let pKey in currentColumns)
+            for (let pKey in obj)
                 currentColumns.push(pKey);
             
             currentColumns = currentColumns.sort();
@@ -183,15 +184,15 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
             let isEqual = false;
 
             if (prevColumns){
-                let isOk = true;
                 if (prevColumns.length == currentColumns.length){
+                    let isOk = true;
                     for (let i=0;i<prevColumns.length;i++)
-                    if (prevColumns[i] != currentColumns){
+                    if (prevColumns[i] != currentColumns[i]){
                         isOk = false;
                         break;
                     }
-                }
-                isEqual = isOk;
+                    isEqual = isOk;
+                }  
             }
 
             prevColumns = currentColumns;

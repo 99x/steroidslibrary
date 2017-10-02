@@ -77,7 +77,9 @@ export class Composer{
   }
 
   public static composeError(steroid:Steroid, result){
-    return Composer._compose(steroid,result,true);
+    let composeResult = Composer._compose(steroid,result,true);
+    console.log("Error occured while processing the request : ", composeResult.code, composeResult.error);
+    return composeResult;
   }
 
   public static convertToLambdaProxyIntegration(steroid:Steroid, response:any){

@@ -61,6 +61,7 @@ export class Steroid {
     private _logger: ActivityLogger;
     
     private _heap: any;
+    private static _staticHeap:any = {};
     private responseParams:any = {};
 
     private static mockObjects = {};
@@ -242,12 +243,12 @@ export class Steroid {
 
     public database(): IDatabaseProvider {
         let self = this;
-        if (!self._heap.database){
-            self._heap.database = {
+        if (!Steroid._staticHeap.database){
+            Steroid._staticHeap.database = {
                 relational: function(): IRelationalDatabase {
-                    if (!self._heap.relational_db)
-                        self._heap.relational_db = RelationalDatabaseFactory.create(self);
-                    return self._heap.relational_db;
+                    if (!Steroid._staticHeap.relational_db)
+                        Steroid._staticHeap.relational_db = RelationalDatabaseFactory.create(self);
+                    return Steroid._staticHeap.relational_db;
                 },
                 cache: function(): ICacheDatabase {
                     return undefined;
@@ -255,7 +256,7 @@ export class Steroid {
             }
         }
 
-        return this._heap.database;
+        return Steroid._staticHeap.database;
     }
 
     constructor (event:IEvent, context:any, callback: ICallback){

@@ -1,4 +1,4 @@
-import {IRelationalDatabase, IRetrievalPlan} from "./IRelationalDatabase"
+import {IRelationalDatabase, IRetrievalPlan, IDataSet} from "./IRelationalDatabase"
 import {Steroid} from "../../../Steroids"
 import {ValueRetriever} from "../../../helpers/ValueRetriever";
 
@@ -165,66 +165,45 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
     }
 
 
-    private divideDataSets(result,dataSetNames){
-        let currentDataSet = undefined;
-        let currentIndex = -1;
-        let generatedIndex = -1;
-        let dataSets = {};
-        let prevColumns = undefined;
-        
-        for (let i=0;i<result.length;i++){
-            let obj = result[i];
-            let currentColumns = [];
-            
-            for (let pKey in obj)
-                currentColumns.push(pKey);
-            
-            currentColumns = currentColumns.sort();
-
-            let isEqual = false;
-
-            if (prevColumns){
-                if (prevColumns.length == currentColumns.length){
-                    let isOk = true;
-                    for (let i=0;i<prevColumns.length;i++)
-                    if (prevColumns[i] != currentColumns[i]){
-                        isOk = false;
-                        break;
-                    }
-                    isEqual = isOk;
-                }  
-            }
-
-            prevColumns = currentColumns;
-
-            if (!isEqual){
-                currentIndex++;
-                currentDataSet = undefined;
-                if (dataSetNames)
-                if (dataSetNames[currentIndex])
-                    currentDataSet = dataSetNames[currentIndex];
-
-                if (!currentDataSet){
-                    generatedIndex++;
-                    currentDataSet = "untitled"  + generatedIndex;
-                }
-
-                dataSets[currentDataSet] = [];
-            }
-
-            dataSets[currentDataSet].push(obj);
-            
+    private normalizeDatasetValues(result, datasetNames) {
+        let currentIndex = 0;
+        let dataset = {};
+         for(let i=0 ; i<result.length ; i++) {
+             let obj = result[i];
+             let currentColumns = Object.keys(obj);
+             let uniqId;
+ 
+             for(let i=0; i<currentColumns.length; i++) {
+                 let val = currentColumns[i];
+                 currentColumns[i] = val.toLowerCase();
+             } 
+             let datasetName;
+             for(let i=0; i<datasetNames.length; i++) {
+                 uniqId = datasetNames[i]["id"];
+                 if(uniqId) 
+                     uniqId = uniqId.toLowerCase();
+                 if(currentColumns.indexOf(uniqId) > -1) {
+                     datasetName = dataset[datasetNames[i]["name"]];
+                     if(datasetName) {
+                         dataset[datasetNames[i]["name"]].push(obj);
+                     } else {
+                         dataset[datasetNames[i]["name"]] = [];
+                         dataset[datasetNames[i]["name"]].push(obj);
+                     }
+                     break;
+                 }
+             }
+ 
         }
+        return dataset;
+     }
 
-        return dataSets;
-    }
-
-    getMultipleResultSets(query:string, ...dataSetNames:string[]):Promise<any>{
+    getMultipleResultSets(query:string, ...dataSetNames:IDataSet[]):Promise<any>{
         return new Promise<any>((resolve,reject)=>{
             this.executeQuery(Object,query)
             .then((res)=>{
                 try{
-                    resolve(this.divideDataSets(res,dataSetNames));
+                    resolve(this.normalizeDatasetValues(res,dataSetNames));
                 }catch (e){
                     reject(e);
                 }

@@ -137,7 +137,7 @@ export class Steroid {
     public request(): IEvent
     {
         try{
-            if (this._event.headers === undefined)
+            if (!this._event.headers)
                 this._event.headers = {};
             
             if (this._event.headers.get === undefined)

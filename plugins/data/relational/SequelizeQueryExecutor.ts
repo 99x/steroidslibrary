@@ -64,11 +64,11 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
         }
     }
 
-    getDataSet(retrievalPlan:IRetrievalPlan[]):Promise<any> {
+    getDataSet(retrievalPlan:IRetrievalPlan[], inputSet?: Object):Promise<any> {
         let responseDataSet = {};
         let sequelize = this.getConnection();
         return new Promise<any>((resolve,reject)=>{
-            this.executeRetrievalUnit(retrievalPlan,responseDataSet,{},sequelize)
+            this.executeRetrievalUnit(retrievalPlan,responseDataSet, inputSet ? inputSet : {},sequelize)
             .then((result)=>{
                 resolve(responseDataSet);
             })
@@ -85,6 +85,16 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
         for (let i=0;i<retrievalPlans.length;i++){
             let plan:IRetrievalPlan = retrievalPlans[i];
             let promiseObj;
+
+            if (inputSet){
+                let query = plan.query;
+                for(let key in inputSet){
+                    let val = inputSet[key];
+                    query = query.replace("{{" + key + "}}", val);
+                }
+                plan.query = query;
+            }
+
             if (plan.subDataSets)
                 promiseObj = this.executeWithSubDataSets(plan, sequelize, responseDataSet, inputSet);
             else
@@ -99,12 +109,6 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
     private async executeSingleUnit(plan:IRetrievalPlan,sequelize,responseDataSet, inputSet): Promise<any>{
         return new Promise<any>((resolve,reject)=>{
 
-            let query = plan.query;
-            for(let key in inputSet){
-                let val = inputSet[key];
-                query = query.replace("{{" + key + "}}", val);
-            }
-
             if (plan.cancelIfEmpty){
                 for (let i=0;i<plan.cancelIfEmpty.length;i++)
                 if (!inputSet[plan.cancelIfEmpty[i]]){
@@ -114,7 +118,7 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
                 }
             }
 
-            this.executeQuery(Object,query)
+            this.executeQuery(Object,plan.query)
             .then((queryResult)=>{
                 responseDataSet[plan.dataSetName] = queryResult;
                 resolve(queryResult);

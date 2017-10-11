@@ -1,6 +1,6 @@
 export interface IRelationalDatabase {
     executeQuery<T>(type: {new(): T;},query:string):Promise<T[]>;
-    getDataSet(retrievalPlan:IRetrievalPlan[]):Promise<any>;
+    getDataSet(retrievalPlan:IRetrievalPlan[], inputSet?: Object):Promise<any>;
     getMultipleResultSets(query:string, ...dataSetNames:IDataSet[]):Promise<any>;
 }
 

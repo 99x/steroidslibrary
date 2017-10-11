@@ -52,6 +52,7 @@ export abstract class AbstractService extends Flask {
                     })
                     .catch((e)=>{
                         let errorMessage:any = {exception:e}
+                        self._steroid.response().setHttpCode("501");
                         self._steroid.response().setParams(false,5001);
                         
                         let logs:any[] = self._steroid.internals().getResource("logger").getLogs();

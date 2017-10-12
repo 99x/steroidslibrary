@@ -67,23 +67,15 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
     private getConnection(): Promise<any>{
         var self = this;
         return new Promise<any>((resolve,reject)=>{
-
-            let connectionPerRequest = this._config.connectionPerRequest ? this._config.connectionPerRequest : true;
-
-            if (connectionPerRequest){
-                this.establishConnection(resolve,reject);
-            }else {
-                if (self._connection){
-                    self._connection.authenticate().then(()=>{
-                        resolve(self._connection);
-                    }).catch((err)=>{
-                        this.establishConnection(resolve,reject);
-                    });
-                }
-                else 
-                    this.establishConnection(resolve,reject);
+            if (self._connection){
+                self._connection.authenticate().then(()=>{
+                    resolve(self._connection);
+                }).catch((err)=>{
+                    self.establishConnection(resolve,reject);
+                });
             }
-
+            else 
+                self.establishConnection(resolve,reject);
         });
     }
 

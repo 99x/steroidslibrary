@@ -243,12 +243,22 @@ export class Steroid {
 
     public database(): IDatabaseProvider {
         let self = this;
-        if (!Steroid._staticHeap.database){
-            Steroid._staticHeap.database = {
+        let heapObj;
+        let connPerRequest = this.config.database.connectionPerRequest;
+        if (connPerRequest == undefined || connPerRequest == null)
+            connPerRequest = true;
+            
+        if (connPerRequest)
+            heapObj = this._heap;
+        else
+            heapObj = Steroid._staticHeap;
+
+        if (!heapObj.database){
+            heapObj.database = {
                 relational: function(): IRelationalDatabase {
-                    if (!Steroid._staticHeap.relational_db)
-                        Steroid._staticHeap.relational_db = RelationalDatabaseFactory.create(self);
-                    return Steroid._staticHeap.relational_db;
+                    if (!heapObj.relational_db)
+                        heapObj.relational_db = RelationalDatabaseFactory.create(self);
+                    return heapObj.relational_db;
                 },
                 cache: function(): ICacheDatabase {
                     return undefined;
@@ -256,7 +266,7 @@ export class Steroid {
             }
         }
 
-        return Steroid._staticHeap.database;
+        return heapObj.database;
     }
 
     constructor (event:IEvent, context:any, callback: ICallback){

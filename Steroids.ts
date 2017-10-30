@@ -2,6 +2,7 @@ import {IEvent, ICallback, Composer} from "./Messages"
 import {Config} from "./Config"
 import {ActivityLogger,LogType} from "./ActivityLogger"
 import {SteroidsMapper} from "./plugins/mapper/SteroidsMapper"
+import {ArrayHelpers} from "./helpers/ArrayHelpers"
 import {AsyncIterator} from "./helpers/AsyncIterator"
 import {Validator} from "./helpers/Validator"
 import {ServiceInvoker} from "./ServiceInvoker"
@@ -309,30 +310,4 @@ export class Steroid {
 
 }
 
-
-(function(){
-    let protoObj:any = Array.prototype;
-    protoObj.first = function () {
-        if (this.length > 0)
-            return this[0];
-    }
-
-    protoObj.firstOrDefault = function (defVal) {
-        if (this.length > 0)
-            return this[0];
-        else
-            return defVal;
-    }
-
-    protoObj.isInstanceOf = function (type: string) {
-        let isOk = true;
-        for (let i=0;i<this.length;i++)
-        if (typeof this[i] !== type){
-            isOk = false;
-            break;
-        }
-
-        return isOk;
-    }
-
-})();
+ArrayHelpers.initialize();

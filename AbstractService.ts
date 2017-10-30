@@ -38,7 +38,8 @@ export abstract class AbstractService extends Flask {
                     } catch (err){
                         callback (err);
                     }
-                }
+                } else 
+                    callback (err);
             });     
         }else {
            callback(undefined, steroidsConfig);

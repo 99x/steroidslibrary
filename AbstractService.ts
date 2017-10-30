@@ -1,6 +1,6 @@
 import {IEvent, ICallback, Composer} from "./Messages"
 import {Steroid} from "./Steroids"
-import {updateConfig} from "./Config"
+import {updateConfig, Config} from "./Config"
 import {Flask} from "./Flask"
 
 declare function require(module:string):any;
@@ -20,11 +20,36 @@ export abstract class AbstractService extends Flask {
         this._steroid = new Steroid(event,context,callback);
     }
 
+    private loadConfig (callback){
+        let fs = require("fs");
+
+        let configFileName = Steroid.globalConfig.configFileName;
+        let steroidsConfig = Config;
+
+        if (configFileName){
+            fs.readFile(configFileName, function (err, data) {
+                let configJson;
+                if (!err){
+                    try{
+                        configJson = JSON.parse(data);
+                        updateConfig(configJson);
+                        delete Steroid.globalConfig.configFileName;
+                        callback(undefined,configJson);
+                    } catch (err){
+                        callback (err);
+                    }
+                }
+            });     
+        }else {
+           callback(undefined, steroidsConfig);
+        }
+    }
+
     public handle (){
         let self = this;
         let fs = require("fs");
 
-        fs.readFile('steroids.json', function (err, data) {
+        this.loadConfig(function (err, configObj) {
             if (err){
                 let errorMessage:any = {exception:err}
                 self._steroid.response().setParams(false,5003);
@@ -34,8 +59,6 @@ export abstract class AbstractService extends Flask {
             }
             else{
                 try{
-                    let configObj = JSON.parse(data);
-                    updateConfig(configObj);
                     self.onHandle(self._steroid)
                     .then((result)=>{
                         let response; 

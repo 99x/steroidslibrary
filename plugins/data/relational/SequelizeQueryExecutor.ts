@@ -4,6 +4,36 @@ import {ValueRetriever} from "../../../helpers/ValueRetriever";
 
 declare function require (module:string):any;
 
+class Authenticator {
+    sequelize;
+
+    constructor (sequelize){
+        this.sequelize = sequelize;
+    }
+    
+    authenticate(): Promise<any>{
+        let sequelize = this.sequelize;
+        let isBusy = true;
+        return new Promise<any>((resolve,reject)=>{
+            
+            setTimeout(()=>{
+                if (isBusy)
+                    reject();
+            },2000);
+
+            sequelize.authenticate()
+            .then(()=>{
+                isBusy= false;
+                resolve();
+            })
+            .catch(()=>{
+                isBusy= false;
+                reject();
+            });
+        });
+    }
+}
+
 export class SequelizeQueryExecutor implements IRelationalDatabase {
     
     private _steroid:Steroid;
@@ -26,20 +56,24 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
 
     executeQuery<T>(type: {new(): T;}, query: string): Promise<T[]> {       
         return new Promise<T[]>((resolve,reject)=>{
-            let sequelize = this.getConnection();
-            sequelize.query(query)
-            .then(results=>{
-                let val;
-                if (results.length > 0)
-                    val = results[0];
-                
-                this.convertToCamelCase(val);
+            this.getConnection().then((sequelize)=>{
+                sequelize.query(query)
+                .then(results=>{
+                    let val;
+                    if (results.length > 0)
+                        val = results[0];
+                    
+                    this.convertToCamelCase(val);
 
-                resolve(val);
-            })
-            .catch ((error)=>{
-                reject(error);
+                    resolve(val);
+                })
+                .catch ((error)=>{
+                    reject(error);
+                });
+            }).catch((err)=>{
+                reject(err);
             });
+
             /*
             .spread((results, metadata) => {
                 resolve(results);
@@ -48,33 +82,48 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
         });       
     }
 
-    private getConnection(){
-        if (this._connection)
-            return this._connection;            
-        else {
-            let Sequelize = require("sequelize");
-            let {driver, database, host, username, password, pool, dialectOptions} = this._config;
-            this._connection = new Sequelize(database, username, password, {
-                host: host,
-                dialect: driver,
-                pool: pool,
-                dialectOptions: dialectOptions
-            });
-            return this._connection;
-        }
+    private establishConnection(resolve,reject){
+        let Sequelize = require("sequelize");
+        let {driver, database, host, username, password, pool, dialectOptions} = this._config;
+        this._connection = new Sequelize(database, username, password, {
+            host: host,
+            dialect: driver,
+            pool: pool,
+            dialectOptions: dialectOptions
+        });
+        resolve(this._connection);
     }
 
-    getDataSet(retrievalPlan:IRetrievalPlan[]):Promise<any> {
-        let responseDataSet = {};
-        let sequelize = this.getConnection();
+    private getConnection(): Promise<any>{
+        var self = this;
         return new Promise<any>((resolve,reject)=>{
-            this.executeRetrievalUnit(retrievalPlan,responseDataSet,{},sequelize)
-            .then((result)=>{
-                resolve(responseDataSet);
-            })
-            .catch((err)=>{
+            if (self._connection){
+                let authenticator = new Authenticator(self._connection);
+                authenticator.authenticate().then(()=>{
+                    resolve(self._connection);
+                }).catch((err)=>{
+                    self.establishConnection(resolve,reject);
+                });
+            }
+            else 
+                self.establishConnection(resolve,reject);
+        });
+    }
+
+    getDataSet(retrievalPlan:IRetrievalPlan[], inputSet?: Object):Promise<any> {
+        let responseDataSet = {};
+        return new Promise<any>((resolve,reject)=>{
+            this.getConnection().then((sequelize)=>{
+                this.executeRetrievalUnit(retrievalPlan,responseDataSet, inputSet ? inputSet : {},sequelize)
+                .then((result)=>{
+                    resolve(responseDataSet);
+                })
+                .catch((err)=>{
+                    reject(err);
+                });
+            }).catch((err)=>{
                 reject(err);
-            })
+            });
         })
         
     }
@@ -85,6 +134,16 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
         for (let i=0;i<retrievalPlans.length;i++){
             let plan:IRetrievalPlan = retrievalPlans[i];
             let promiseObj;
+
+            if (inputSet){
+                let query = plan.query;
+                for(let key in inputSet){
+                    let val = inputSet[key];
+                    query = query.replace("{{" + key + "}}", val);
+                }
+                plan.query = query;
+            }
+
             if (plan.subDataSets)
                 promiseObj = this.executeWithSubDataSets(plan, sequelize, responseDataSet, inputSet);
             else
@@ -99,12 +158,6 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
     private async executeSingleUnit(plan:IRetrievalPlan,sequelize,responseDataSet, inputSet): Promise<any>{
         return new Promise<any>((resolve,reject)=>{
 
-            let query = plan.query;
-            for(let key in inputSet){
-                let val = inputSet[key];
-                query = query.replace("{{" + key + "}}", val);
-            }
-
             if (plan.cancelIfEmpty){
                 for (let i=0;i<plan.cancelIfEmpty.length;i++)
                 if (!inputSet[plan.cancelIfEmpty[i]]){
@@ -114,7 +167,7 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
                 }
             }
 
-            this.executeQuery(Object,query)
+            this.executeQuery(Object,plan.query)
             .then((queryResult)=>{
                 responseDataSet[plan.dataSetName] = queryResult;
                 resolve(queryResult);

@@ -1,4 +1,4 @@
-import {IRelationalDatabase, IRetrievalPlan} from "./IRelationalDatabase"
+import {IRelationalDatabase, IRetrievalPlan, IDataSet} from "./IRelationalDatabase"
 import {RestRequestor} from "../../../helpers/RestRequestor"
 import {Steroid} from "../../../Steroids"
 
@@ -46,13 +46,13 @@ export class OnsiteQueryExecutor implements IRelationalDatabase {
 
     }
 
-    getDataSet(retrievalPlan:IRetrievalPlan[]):Promise<any> {
+    getDataSet(retrievalPlan:IRetrievalPlan[], inputSet?: Object):Promise<any> {
         return new Promise<any>((resolve,reject)=>{
             resolve({});
         });
     }
 
-    getMultipleResultSets(query:string, ...dataSetNames:string[]):Promise<any>{
+    getMultipleResultSets(query:string, ...dataSetNames:IDataSet[]):Promise<any>{
         return new Promise<any>((resolve,reject)=>{
             resolve({});
         });

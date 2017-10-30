@@ -27,7 +27,7 @@ export class QueryExecutorFileStorage implements IFileStorage{
         return new Promise<any>((resolve,reject)=>{
             let requestor = new RestRequestor(this._steroid);
             var headers = {
-                "Authorization" : this._config.database.settings.authToken
+                "Authorization" : this._config.storage.settings.authToken
             }
 
             let className,idValue

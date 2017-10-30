@@ -4,6 +4,36 @@ import {ValueRetriever} from "../../../helpers/ValueRetriever";
 
 declare function require (module:string):any;
 
+class Authenticator {
+    sequelize;
+
+    constructor (sequelize){
+        this.sequelize = sequelize;
+    }
+    
+    authenticate(): Promise<any>{
+        let sequelize = this.sequelize;
+        let isBusy = true;
+        return new Promise<any>((resolve,reject)=>{
+            
+            setTimeout(()=>{
+                if (isBusy)
+                    reject();
+            },2000);
+
+            sequelize.authenticate()
+            .then(()=>{
+                isBusy= false;
+                resolve();
+            })
+            .catch(()=>{
+                isBusy= false;
+                reject();
+            });
+        });
+    }
+}
+
 export class SequelizeQueryExecutor implements IRelationalDatabase {
     
     private _steroid:Steroid;
@@ -68,7 +98,8 @@ export class SequelizeQueryExecutor implements IRelationalDatabase {
         var self = this;
         return new Promise<any>((resolve,reject)=>{
             if (self._connection){
-                self._connection.authenticate().then(()=>{
+                let authenticator = new Authenticator(self._connection);
+                authenticator.authenticate().then(()=>{
                     resolve(self._connection);
                 }).catch((err)=>{
                     self.establishConnection(resolve,reject);

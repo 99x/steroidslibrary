@@ -52,6 +52,7 @@ export class SteroidUtils
 export class Steroid {
     
     public config;
+    public static globalConfig = {configFileName:"steroids.json"};
 
     private _event: IEvent;
     private _callback: ICallback;

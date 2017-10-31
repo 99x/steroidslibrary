@@ -4,6 +4,9 @@ import {SequelizeQueryExecutor} from "./SequelizeQueryExecutor";
 import {Steroid} from "../../../Steroids";
 import {ValueRetriever} from "../../../helpers/ValueRetriever"
 
+import {PluginManager} from "../../../plugins/PluginManager"
+import {PluginType} from "../../../plugins/PluginType"
+
 declare let console:any;
 
 export class RelationalDatabaseFactory {
@@ -16,8 +19,11 @@ export class RelationalDatabaseFactory {
                 case "queryExecutor":
                     outObject = new OnsiteQueryExecutor(steroid);
                     break;
-                default:
+                case "orm":
                     outObject = new SequelizeQueryExecutor(steroid);
+                    break;
+                default:
+                    outObject = PluginManager.getInstance(steroid, PluginType.Database, dbName);
                     break;
             }
         }

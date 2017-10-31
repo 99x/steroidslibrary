@@ -7,7 +7,7 @@ export class PluginManager {
 
     private static _pluginList = {}; 
 
-    public static register(plugin:{new(); AbstractSteroidPlugin}){
+    public static register(plugin: {new()}){
         let plugInstance = new plugin();
         let info:ISteroidPlugin = plugInstance.onRegister();
         let pl = PluginManager._pluginList;

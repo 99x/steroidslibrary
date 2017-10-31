@@ -15,6 +15,9 @@ import {RelationalDatabaseFactory} from "./plugins/data/relational/RelationalDat
 
 import {ICacheDatabase} from "./plugins/data/cache/ICacheDatabase"
 
+import {AbstractSteroidPlugin} from "./plugins/AbstractSteroidPlugin"
+import {PluginManager} from "./plugins/PluginManager"
+
 export interface IDatabaseProvider
 {
     relational(): IRelationalDatabase;
@@ -308,6 +311,9 @@ export class Steroid {
         }
     }
 
+    public static use(plugin: {new()}){
+        PluginManager.register(plugin);
+    }
 }
 
 ArrayHelpers.initialize();

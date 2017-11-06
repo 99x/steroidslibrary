@@ -169,8 +169,9 @@ export class TestRunner {
                     return controllerMethods;
                 })(metadata.thentext,scenarioText);
 
-
+                
                 if (isAsync){
+                    
                     try {
                         typeObj[attributeKey](controller.given,controller.when,controller.then,controller.and)
                         .then(()=>{
@@ -182,6 +183,7 @@ export class TestRunner {
                         });
                     }
                     catch (e){
+                        process.send(e);
                         controller.logError(e);
                         asyncDone(controller.getScenarioObject());
                     }
@@ -202,15 +204,19 @@ export class TestRunner {
             resultObject.scenarios.push(scenario)
         });
 
+        /*
         var doneFunc;
         describe("Async handler for steroids framework",()=>{
             it("Is completed",(done)=>{
                 doneFunc = done;
             }).timeout(20 * 1000);
         });
-
+        */
 
         iterator.onComplete(()=>{
+//              process.send(resultObject);
+            //console.log(resultObject);
+            /*
             let rObj = resultObject;
             describe("Feature " + rObj.jiraTask + ": "  + rObj.feature,()=>{
                 rObj.scenarios.forEach((scenario)=>{
@@ -236,6 +242,7 @@ export class TestRunner {
                 });
             });
             doneFunc();
+            */
         });
 
         iterator.start();

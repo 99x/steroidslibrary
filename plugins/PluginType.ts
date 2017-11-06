@@ -1,1 +1,1 @@
-export enum PluginType {Database, Cache, Transformation}
+export enum PluginType {Database, Cache, Transformation, Storage}

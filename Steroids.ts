@@ -206,6 +206,20 @@ export class Steroid {
                     self._contextObj.headers[headerKey] = headers[hk];
                 }
             },
+            getHttpHeaders:()=>{
+                let headerObj:any = {};
+                
+                for (let hKey in self._contextObj.headers)
+                    headerObj[hKey] = self._contextObj.headers[hKey];
+
+                headerObj.get = function(value:string){
+                    for (let hKey in self._contextObj.headers)
+                    if (hKey.toLowerCase() === value.toLowerCase())
+                        return self._contextObj.headers[hKey];
+                }
+                
+                return headerObj;
+            },
             preventJsonFormatting:()=>{
                 self._extraSettings.isFormattingPrevented = true;
             },

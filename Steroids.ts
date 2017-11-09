@@ -283,6 +283,11 @@ export class Steroid {
         this.config = Config;
         this._logger = new ActivityLogger();
         this._heap = {};
+
+        let g:any = global;
+
+        if (!g.EXECUTION_ENVIRONMENT)
+            g.EXECUTION_ENVIRONMENT = "serverless";
     }
 
     public internals(){

@@ -22,10 +22,14 @@ export class ServiceInvoker {
     }
 
     public static test <T extends AbstractService>(type: { new(event:IEvent, context:any, callback:ICallback): T ;}){
-        let mockContext = {succeed:()=>{},fail:()=>{}};
         return {
             withParameters: function(event:IEvent): Promise<IResponse>{
                 let promiseObj = new Promise<IResponse>(function(resolve,reject){
+                    let mockContext = {succeed:(message)=>{
+                        resolve(message);
+                    },fail:(error)=>{
+                        reject(error);
+                    }};
                     let handlerObject = new type(event,mockContext, function(error, message){
                         if (error)
                             resolve(error);

@@ -1,5 +1,7 @@
 import {Steroid} from "./Steroids"
 
+declare let console:any;
+
 export interface IEvent
 {
     pathParameters:any;

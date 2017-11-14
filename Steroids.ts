@@ -37,6 +37,7 @@ export interface ISteroidResponse {
     response: any
 }
 
+declare let global:any;
 declare let console:any;
 declare function require(moduleName:string):any;
 

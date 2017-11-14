@@ -4,7 +4,7 @@ import {Steroid} from "../../../Steroids"
 import {ValueRetriever} from "../../../helpers/ValueRetriever";
 
 declare function require (module:string):any;
-declare function setTimeOut(func:any, timeout:number):any;
+declare function setTimeout(func:any, timeout:number):any;
 
 class Authenticator {
     sequelize;

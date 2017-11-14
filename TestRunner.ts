@@ -4,14 +4,6 @@ import {AsyncIterator} from "./helpers/AsyncIterator"
 declare function require(module:string);
 declare let console:any;
 
-//function describe(name,func){func();}
-//function it(name,func):any{try{func(function(){});}catch(e){} return {timeout:()=>{}}}
-
-declare function it(label:string, func:Function);
-declare function describe(label:string, func:Function);
-
-require("mocha");
-
 export function feature(value:string){
     return function(target){
         TestRunner.setMetadata(target.name,"__feature","value", value);

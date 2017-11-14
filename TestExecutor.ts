@@ -6,6 +6,20 @@ declare let console:any;
 declare let process:any;
 declare let v8debug:any;
 
+
+function Splash(){
+let splashString = 
+`
+\x1b[31m   ______               _    __  
+\x1b[31m  / __/ /____ _______  (_)__/ /__
+\x1b[31m _\ \/ __/ -_) __/ _ \/ / _  (_-<
+\x1b[31m/___/\__/\__/_/  \___/_/\_,_/___/
+`;
+
+console.log(splashString);
+console.log("\x1b[32m", `Executing steroids unit test cases`,"\x1b[0m","\n\n");
+}
+
 class SteroidsTestEngine {
     
     private _basePath;
@@ -81,6 +95,7 @@ class SteroidsTestEngine {
 export class TestExecutor {
 
     public static execute(basePath:string){
+        Splash();
         let executor = new SteroidsTestEngine(basePath);
         
         executor.start().then((results)=>{

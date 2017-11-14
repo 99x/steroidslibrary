@@ -26,6 +26,10 @@ export class ServiceInvoker {
             withParameters: function(event:IEvent): Promise<IResponse>{
                 let promiseObj = new Promise<IResponse>(function(resolve,reject){
                     let mockContext = {succeed:(message)=>{
+                        
+                        if (typeof message.body == "string")
+                            message = JSON.parse(message.body);
+
                         resolve(message);
                     },fail:(error)=>{
                         reject(error);
@@ -33,8 +37,9 @@ export class ServiceInvoker {
                     let handlerObject = new type(event,mockContext, function(error, message){
                         if (error)
                             resolve(error);
-                        else
+                        else{
                             resolve(message);
+                        }
                     });
                     handlerObject.inject();
                     handlerObject.handle();

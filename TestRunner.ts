@@ -205,7 +205,7 @@ export class TestRunner {
             iterator.onComplete(()=>{
                 let rObj = resultObject;
                 
-                console.log ("Feature " + rObj.jiraTask + ": "  + rObj.feature);
+                console.log ("Feature " + rObj.jiraTask + ": ", rObj.feature);
                 rObj.scenarios.forEach((scenario)=>{
                     console.log ("\t" + scenario.name);
 
@@ -215,16 +215,18 @@ export class TestRunner {
                     scenario.when.forEach(txt => {caption += txt;});
                     
                     if (caption)
-                        console.log ("\t\t" + caption);
+                        console.log ("\t" + caption);
 
                     for (let i=0;i<scenario.then.length;i++){
                         let thenFunc = scenario.then[i];
-                        console.log ("\t\t\t" + thenFunc.message);
+                        console.log ("\t" + thenFunc.message);
                         if (thenFunc.exception)
-                        console.log ("\t\t\t\t" + thenFunc.exception);
+                            console.log ("\x1b[31m","\tTest Failed (x) : " + thenFunc.exception, "\x1b[0m");
+                        else
+                            console.log ("\x1b[32m","\tTest Passed (/)", "\x1b[0m");
                     }
                 });
-                console.log ("\n\n");
+                console.log ("\n");
                 mainResolve(resultObject);
             });
 

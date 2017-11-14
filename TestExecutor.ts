@@ -42,9 +42,9 @@ class SteroidsTestEngine {
         
         return new Promise<any>((resolve,reject)=>{
             let fileList = this.getUnitTestFiles();
-            let iterator = new AsyncIterator (fileList,{});
-            iterator.onComplete((results:any[])=>{
-                resolve(results);
+            let iterator = new AsyncIterator (fileList,{results:[]});
+            iterator.onComplete((results:any)=>{
+                resolve(results.results);
             });
 
             iterator.onCompleteOne((success:boolean, result:any)=>{
@@ -56,13 +56,16 @@ class SteroidsTestEngine {
                     let moduleObj = require(element);
                     moduleObj._handler
                     .then((result)=>{
+                        inObj.results.push({validFormat:true, result:result});
                         ctrl(element);
                     })
                     .catch((e)=>{
+                        inObj.results.push({validFormat:false, result:e});
                         ctrl(e);
                     })
 
                 }catch (e){
+                    inObj.results.push({validFormat:false, result:e});
                     ctrl(e);
                 }
                 
@@ -82,13 +85,40 @@ export class TestExecutor {
         
         executor.start().then((results)=>{
             
-            let hasError = false
-            if (hasError){
-                console.log ("Some unit tests have failed!!!");
+            let passCount = 0;
+            let failCount = 0;
+
+
+            for (let i=0;i<results.length;i++){
+                let r = results[i];
+                if (r.validFormat){
+                    let scenarios = r.result.scenarios;
+
+                    for (let j=0;j<scenarios.length;j++){
+                        let scenario = scenarios[j];
+                        for (let k=0;k<scenario.then.length;k++){
+                            let t = scenario.then[k];
+                            if (t.exception)
+                                failCount++;
+                            else
+                                passCount++;
+                        }
+                    }
+                }else {
+                    failCount++;
+                }
+            }
+
+
+            console.log ("\x1b[32m","Number of success unit test cases : " + passCount, "\x1b[0m");
+            
+            if (failCount > 0)
+                console.log ("\x1b[31m", "Number of failed unit test cases : " + failCount, "\x1b[0m");
+
+            if (failCount > 0){
                 process.exit(3);
             }
             else{
-                console.log ("All the unit tests have passed!!!");
                 process.exit(0);
             }
         }).catch((err)=>{

@@ -7,4 +7,5 @@ export interface IFileData{
 
 export interface IFileStorage {
     getById(id:string): Promise<IFileData>
+    getFileSizeById(id: string): Promise<IFileData>
 }

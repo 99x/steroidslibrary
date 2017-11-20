@@ -59,4 +59,8 @@ export class QueryExecutorFileStorage implements IFileStorage{
         });
 
     }
+
+    getFileSizeById(id: string): Promise<IFileData> {
+        throw new Error('Not implemented');
+    }
 }

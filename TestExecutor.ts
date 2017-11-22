@@ -29,22 +29,29 @@ class SteroidsTestEngine {
     }
 
     private getUnitTestFiles(): string[]{
-        const fs = require('fs');
-        const path = require('path');
-        let filesToReturn = [];
-        function walkDir(currentPath) {
-            let files = fs.readdirSync(currentPath);
-            for (let i in files) {
-                var curFile = path.join(currentPath, files[i]);      
-                if (fs.statSync(curFile).isFile() && curFile.endsWith(".tests.js")) {
-                    filesToReturn.push(curFile);
-                } else if (fs.statSync(curFile).isDirectory()) {
-                    walkDir(curFile);
+        let lastArgv = process.argv[process.argv.length -1];
+
+        if (lastArgv.includes(".tests.ts")){
+            let modifiedArgv = lastArgv.replace(/\\/g,"/").replace("/src/","/dist/").replace(".tests.ts",".tests.js");
+            return [modifiedArgv];
+        }else {
+            const fs = require('fs');
+            const path = require('path');
+            let filesToReturn = [];
+            function walkDir(currentPath) {
+                let files = fs.readdirSync(currentPath);
+                for (let i in files) {
+                    var curFile = path.join(currentPath, files[i]);      
+                    if (fs.statSync(curFile).isFile() && curFile.endsWith(".tests.js")) {
+                        filesToReturn.push(curFile);
+                    } else if (fs.statSync(curFile).isDirectory()) {
+                        walkDir(curFile);
+                    }
                 }
-            }
-        };
-        walkDir(this._basePath);
-        return filesToReturn;
+            };
+            walkDir(this._basePath);
+            return filesToReturn;
+        }
     }
 
     private printResults(results:string){

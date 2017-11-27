@@ -90,29 +90,31 @@ export class Steroid {
             get: function(target, property:string, receiver) {
                 return function(event,context,callback){
 
-                let moduleFileName;
-                let moduleName;
-                let path = require("path");
-                let fs = require("fs");
-                if (property.includes("_")){
-                    let splitData = property.split("_");
-                    moduleName = splitData[splitData.length-1];
-                    splitData[splitData.length-1] = moduleName + ".js"
-                    moduleFileName = path.join(currentFolder,...splitData);
-                    
-                } else {
-                    moduleFileName = path.join(currentFolder,property + ".js");
-                    moduleName = property;
-                }
-
-                if (!fs.existsSync(moduleFileName)){
-                    context.succeed({body:"{}", headers:{}, statusCode:400});
-                }else{
-                    if (dependencyFunction != undefined && dependencyFunction != null)
-                        dependencyFunction();
-
-                        ServiceInvoker.invokeByFilename(moduleName,moduleFileName,event,context,callback);
+                    let moduleFileName;
+                    let moduleName;
+                    let path = require("path");
+                    let fs = require("fs");
+                    if (property.includes("_")){
+                        let splitData = property.split("_");
+                        moduleName = splitData[splitData.length-1];
+                        splitData[splitData.length-1] = moduleName + ".js"
+                        moduleFileName = path.join(currentFolder,...splitData);
+                        
+                    } else {
+                        moduleFileName = path.join(currentFolder,property + ".js");
+                        moduleName = property;
                     }
+
+                    fs.exists(moduleFileName, (exists)=>{
+                        if (!exists){
+                            context.succeed({body:"{}", headers:{}, statusCode:400});
+                        }else{
+                            if (dependencyFunction != undefined && dependencyFunction != null)
+                                dependencyFunction();
+        
+                                ServiceInvoker.invokeByFilename(moduleName,moduleFileName,event,context,callback);
+                        }
+                    });
                 }
             }
         });

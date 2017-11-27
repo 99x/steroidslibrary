@@ -6,9 +6,18 @@ declare function require(filename:string):any;
 
 export class ServiceInvoker {
     
+    private static moduleCache = {};
+
     public static invokeByFilename(moduleName:string, filename:string, event:IEvent, context:any, callback:ICallback){
         Flask.initialize();
-        let handlerModule = require(filename);
+        let handlerModule;
+        if (ServiceInvoker.moduleCache[filename])
+            handlerModule = ServiceInvoker.moduleCache[filename];
+        else {
+            handlerModule = require(filename);
+            ServiceInvoker.moduleCache[filename] = handlerModule;
+        }
+
         let handlerObject = new handlerModule[moduleName](event,context,callback);
         handlerObject.inject();
         handlerObject.handle();        

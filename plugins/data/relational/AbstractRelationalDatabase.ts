@@ -15,22 +15,18 @@ export abstract class AbstractRelationalDatabase implements IRelationalDatabase 
     getDataSet(retrievalPlan: IRetrievalPlan[], inputSet?: Object): Promise<any> {
         let responseDataSet = {};
         return new Promise<any>((resolve, reject) => {
-            this.getConnection().then((sequelize) => {
-                this.executeRetrievalUnit(retrievalPlan, responseDataSet, inputSet ? inputSet : {}, sequelize)
-                    .then((result) => {
-                        resolve(responseDataSet);
-                    })
-                    .catch((err) => {
-                        reject(err);
-                    });
-            }).catch((err) => {
-                reject(err);
-            });
+            this.executeRetrievalUnit(retrievalPlan, responseDataSet, inputSet ? inputSet : {})
+                .then((result) => {
+                    resolve(responseDataSet);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
         })
 
     }
 
-    private executeRetrievalUnit(retrievalPlans: IRetrievalPlan[], responseDataSet, inputSet, sequelize): Promise<any> {
+    private executeRetrievalUnit(retrievalPlans: IRetrievalPlan[], responseDataSet, inputSet): Promise<any> {
         let promiseArray = [];
 
         for (let i = 0; i < retrievalPlans.length; i++) {
@@ -38,18 +34,19 @@ export abstract class AbstractRelationalDatabase implements IRelationalDatabase 
             let promiseObj;
 
             if (inputSet) {
-                let query = plan.query;
+                let query = typeof (plan.query) == "object" ? plan.query.query : plan.query;
                 for (let key in inputSet) {
                     let val = inputSet[key];
                     query = query.replace("{{" + key + "}}", val);
                 }
-                plan.query = query;
+                let qObj = typeof (plan.query) == "object" ? plan.query : plan
+                qObj.query = query;
             }
 
             if (plan.subDataSets)
-                promiseObj = this.executeWithSubDataSets(plan, sequelize, responseDataSet, inputSet);
+                promiseObj = this.executeWithSubDataSets(plan, responseDataSet, inputSet);
             else
-                promiseObj = this.executeSingleUnit(plan, sequelize, responseDataSet, inputSet);
+                promiseObj = this.executeSingleUnit(plan, responseDataSet, inputSet);
 
             promiseArray.push(promiseObj);
         }
@@ -57,32 +54,37 @@ export abstract class AbstractRelationalDatabase implements IRelationalDatabase 
         return Promise.all(promiseArray);
     }
 
-    private async executeSingleUnit(plan: IRetrievalPlan, sequelize, responseDataSet, inputSet): Promise<any> {
+    private async executeSingleUnit(plan: IRetrievalPlan, responseDataSet, inputSet): Promise<any> {
         return new Promise<any>((resolve, reject) => {
 
+            let canExecute = true;
             if (plan.cancelIfEmpty) {
                 for (let i = 0; i < plan.cancelIfEmpty.length; i++)
                     if (!inputSet[plan.cancelIfEmpty[i]]) {
                         let result = [];
                         responseDataSet[plan.dataSetName] = result;
+                        canExecute = false;
                         resolve(result);
+
                     }
             }
-
-            this.executeQuery(Object, plan.query)
-                .then((queryResult) => {
-                    responseDataSet[plan.dataSetName] = queryResult;
-                    resolve(queryResult);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
+            
+            if (canExecute){
+                this.executeQuery(Object, plan.query)
+                    .then((queryResult) => {
+                        responseDataSet[plan.dataSetName] = queryResult;
+                        resolve(queryResult);
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            }
         });
     }
 
-    private async executeWithSubDataSets(plan: IRetrievalPlan, sequelize, responseDataSet, inputSet): Promise<any> {
+    private async executeWithSubDataSets(plan: IRetrievalPlan, responseDataSet, inputSet): Promise<any> {
         return new Promise<any>((resolve, reject) => {
-            this.executeSingleUnit(plan, sequelize, responseDataSet, inputSet)
+            this.executeSingleUnit(plan, responseDataSet, inputSet)
                 .then((result) => {
                     let newInputSet = {};
 
@@ -105,7 +107,11 @@ export abstract class AbstractRelationalDatabase implements IRelationalDatabase 
                         newInputSet[processor.name] = finalValue;
                     }
 
-                    this.executeRetrievalUnit(plan.subDataSets, responseDataSet, newInputSet, sequelize)
+                    for (let ik in inputSet)
+                        if (!newInputSet[ik])
+                            newInputSet[ik] = inputSet[ik];
+
+                    this.executeRetrievalUnit(plan.subDataSets, responseDataSet, newInputSet)
                         .then((result) => {
                             resolve(result);
                         })

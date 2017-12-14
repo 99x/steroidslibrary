@@ -13,17 +13,19 @@ export abstract class AbstractService extends Flask {
     private _lambdaContext;
 
     private _contextObj:any;
+    private _configObj:any;
 
     constructor(event: IEvent, context:any, callback: ICallback){
         super();
         this._lambdaContext = context;
         this._callback = callback;
         this._event = event;
-        this._contextObj = {};
+        this._contextObj = {statusCode:200, headers:{}};
         this._steroid = new Steroid(event,context,callback, this._contextObj);
     }
 
     private loadConfig (callback){
+        let self = this;
         let fs = require("fs");
 
         let configFileName = Steroid.globalConfig.configFileName;
@@ -37,6 +39,7 @@ export abstract class AbstractService extends Flask {
                         configJson = JSON.parse(data);
                         updateConfig(configJson);
                         delete Steroid.globalConfig.configFileName;
+                        self._configObj = configJson;
                         callback(undefined,configJson);
                     } catch (err){
                         callback (err);
@@ -45,7 +48,8 @@ export abstract class AbstractService extends Flask {
                     callback (err);
             });     
         }else {
-           callback(undefined, steroidsConfig);
+            self._configObj = steroidsConfig;
+            callback(undefined, steroidsConfig);
         }
     }
 
@@ -63,19 +67,12 @@ export abstract class AbstractService extends Flask {
             }
             else{
                 try{
-                    let defHeaders;
-                    if (configObj.defaultResponseHeaders)
-                        defHeaders = configObj.defaultResponseHeaders;
-                    else 
-                        defHeaders = {"Content-Type":"application/json","Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers":"*","Access-Control-Allow-Methods":"*","Cache-Control": "no-cache"};
-                    
-                    self._contextObj.statusCode = 200;
-                    self._contextObj.headers = defHeaders;
-
                     self.onHandle(self._steroid)
                     .then((result)=>{
                         let response; 
                         let extraSettings = self._steroid.internals().getExtraSettings();
+
+                        self.setDefaultResponseHeaders();
 
                         if (extraSettings.isFormattingPrevented === undefined)
                             response = Composer.compose(self._steroid,result);
@@ -83,6 +80,7 @@ export abstract class AbstractService extends Flask {
                             response = Composer.convertToLambdaProxyIntegration(self._steroid, result);
                         
                         let contextObj = self._steroid.internals().getGeneratedContext();
+
                         self._lambdaContext.succeed(contextObj);
            
                     })
@@ -90,7 +88,7 @@ export abstract class AbstractService extends Flask {
                         let errorMessage:any = {exception:e}
                         self._steroid.response().setHttpCode("501");
                         self._steroid.response().setParams(false,5001);
-                        
+                        self.setDefaultResponseHeaders();
                         let logs:any[] = self._steroid.internals().getResource("logger").getLogs();
                         errorMessage.requestTrace = logs.map(item=> {
                             let time;
@@ -113,12 +111,44 @@ export abstract class AbstractService extends Flask {
                     let errorMessage:any = {exception:e}
                     self._steroid.response().setHttpCode("501");
                     self._steroid.response().setParams(false,5002);
+                    self.setDefaultResponseHeaders();
                     let response = Composer.composeError(self._steroid,errorMessage);
                     self._callback(undefined,response);
                 }
             }
 
         });
+
+    }
+
+
+    private setDefaultResponseHeaders(){
+        
+        let defHeaders;
+        if (this._configObj.defaultResponseHeaders){
+            if (this._configObj.defaultResponseHeaders[this._contextObj.statusCode])
+                defHeaders = this._configObj.defaultResponseHeaders[this._contextObj.statusCode];
+
+            if (!defHeaders)
+            if (this._configObj.defaultResponseHeaders["default"])
+                defHeaders = this._configObj.defaultResponseHeaders["default"];
+        }
+
+        if (!defHeaders)
+            defHeaders = {"Content-Type":"application/json","Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers":"*","Access-Control-Allow-Methods":"*","Cache-Control": "no-cache"};
+       
+        for (let dKey in defHeaders){
+            let isFound = false;
+            for (let hKey in this._contextObj.headers){
+                if (hKey.toLowerCase() == dKey.toLowerCase()){
+                    isFound = true;
+                    break;
+                }
+            }
+
+            if (!isFound)
+                this._contextObj.headers[dKey] = defHeaders[dKey];
+        }       
 
     }
 

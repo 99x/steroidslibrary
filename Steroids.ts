@@ -293,7 +293,7 @@ export class Steroid {
 
     constructor (event:IEvent, context:any, callback: ICallback){
         this._lambdaContext = context;
-        this._contextObj = {statusCode:200,headers:{"Content-Type":"application/json","Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers":"*","Access-Control-Allow-Methods":"*"}};
+        this._contextObj = {statusCode:200,headers:{"Content-Type":"application/json","Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers":"*","Access-Control-Allow-Methods":"*","Cache-Control": "no-cache"}};
         this._extraSettings = {canReturnWithoutStringify:false};
         this._event = event;
         this._callback = callback;

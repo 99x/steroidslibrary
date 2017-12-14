@@ -291,13 +291,13 @@ export class Steroid {
         return heapObj.database;
     }
 
-    constructor (event:IEvent, context:any, callback: ICallback){
+    constructor (event:IEvent, context:any, callback: ICallback, serviceContext?:any){
+        this.config = Config;
         this._lambdaContext = context;
-        this._contextObj = {statusCode:200,headers:{"Content-Type":"application/json","Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers":"*","Access-Control-Allow-Methods":"*","Cache-Control": "no-cache"}};
+        this._contextObj = serviceContext;
         this._extraSettings = {canReturnWithoutStringify:false};
         this._event = event;
         this._callback = callback;
-        this.config = Config;
         this._logger = new ActivityLogger();
         this._heap = {};
 

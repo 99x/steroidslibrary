@@ -12,12 +12,15 @@ export abstract class AbstractService extends Flask {
     private _callback;
     private _lambdaContext;
 
+    private _contextObj:any;
+
     constructor(event: IEvent, context:any, callback: ICallback){
         super();
         this._lambdaContext = context;
         this._callback = callback;
         this._event = event;
-        this._steroid = new Steroid(event,context,callback);
+        this._contextObj = {};
+        this._steroid = new Steroid(event,context,callback, this._contextObj);
     }
 
     private loadConfig (callback){
@@ -60,6 +63,15 @@ export abstract class AbstractService extends Flask {
             }
             else{
                 try{
+                    let defHeaders;
+                    if (configObj.defaultResponseHeaders)
+                        defHeaders = configObj.defaultResponseHeaders;
+                    else 
+                        defHeaders = {"Content-Type":"application/json","Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers":"*","Access-Control-Allow-Methods":"*","Cache-Control": "no-cache"};
+                    
+                    self._contextObj.statusCode = 200;
+                    self._contextObj.headers = defHeaders;
+
                     self.onHandle(self._steroid)
                     .then((result)=>{
                         let response; 

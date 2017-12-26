@@ -127,10 +127,27 @@ export abstract class AbstractRelationalDatabase implements IRelationalDatabase 
 
 
     private normalizeDatasetValues(result, datasetNames) {
-        let currentIndex = 0;
+        let currentIndex = -1;
         let dataset = {};
+        let currentDataSet = undefined;
+        
         for (let i = 0; i < result.length; i++) {
             let obj = result[i];
+            if (!currentDataSet){
+                currentIndex++;
+                let currentDataSetName = datasetNames[currentIndex].name;
+                currentDataSet = [];
+                dataset[currentDataSetName] = currentDataSet;
+            }
+
+            if (obj["__end"]){
+                currentDataSet = undefined;
+                continue;
+            }else {
+                currentDataSet.push(obj);
+            }
+
+            /*
             let currentColumns = Object.keys(obj);
             let uniqId;
 
@@ -141,20 +158,23 @@ export abstract class AbstractRelationalDatabase implements IRelationalDatabase 
             let datasetName;
             for (let i = 0; i < datasetNames.length; i++) {
                 uniqId = datasetNames[i]["id"];
-                if (uniqId)
+                if (uniqId !== undefined){
+                    
+                } else {
                     uniqId = uniqId.toLowerCase();
-                if (currentColumns.indexOf(uniqId) > -1) {
-                    datasetName = dataset[datasetNames[i]["name"]];
-                    if (datasetName) {
-                        dataset[datasetNames[i]["name"]].push(obj);
-                    } else {
-                        dataset[datasetNames[i]["name"]] = [];
-                        dataset[datasetNames[i]["name"]].push(obj);
+                    if (currentColumns.indexOf(uniqId) > -1) {
+                        datasetName = dataset[datasetNames[i]["name"]];
+                        if (datasetName) {
+                            dataset[datasetNames[i]["name"]].push(obj);
+                        } else {
+                            dataset[datasetNames[i]["name"]] = [];
+                            dataset[datasetNames[i]["name"]].push(obj);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
-
+            */
         }
         return dataset;
     }

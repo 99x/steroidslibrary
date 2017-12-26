@@ -46,16 +46,19 @@ export class JoinOps {
                 let {dataset,mainField,dataSetField} = this._joinConfigs[j];
                 let fieldName = fields [j];
 
-                let bindValues = dataset.filter((obj)=>{
-                    let isValid = false;
-                    if (obj)
-                    if (obj[dataSetField] && mainObj[mainField])
-                    if (obj[dataSetField] == mainObj[mainField])
-                        isValid = true;
-                    return isValid;
-                });
+                if (dataset){
+                    let bindValues = dataset.filter((obj)=>{
+                        let isValid = false;
+                        if (obj)
+                        if (obj[dataSetField] && mainObj[mainField])
+                        if (obj[dataSetField] == mainObj[mainField])
+                            isValid = true;
+                        return isValid;
+                    });
 
-                mainObj[fieldName] = bindValues;
+                    mainObj[fieldName] = bindValues;
+                } else 
+                    mainObj[fieldName] = [];
             }
         }
     }

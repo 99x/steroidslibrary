@@ -41,6 +41,7 @@ export class SequelizeQueryExecutor extends AbstractRelationalDatabase {
     private _connection;
 
     private convertToCamelCase(results:any[]){
+        if (results)
         for (let i=0;i<results.length;i++){
             let obj = results[i];
             for (let objKey in obj){
@@ -60,12 +61,14 @@ export class SequelizeQueryExecutor extends AbstractRelationalDatabase {
                 sequelize.query(query)
                 .then(results=>{
                     let val;
-                    if (results.length > 0)
-                        val = results[0];
-                    
-                    this.convertToCamelCase(val);
+                    if (results){
+                        if (results.length > 0)
+                            val = results[0];
+                        
+                        this.convertToCamelCase(val);
 
-                    resolve(val);
+                        resolve(val);
+                    }
                 })
                 .catch ((error)=>{
                     reject(error);

@@ -17,7 +17,7 @@ export class PluginManager {
         pl[info.type][info.key] = plugInstance;
     }
 
-    public static getInstance(steroid:Steroid, pluginType:PluginType, key:string) {
+    public static getInstance(steroid:Steroid, pluginType:PluginType, key:string, parameters?: any) {
         let plugInstance = undefined;
 
         let pl = PluginManager._pluginList;
@@ -26,7 +26,10 @@ export class PluginManager {
         if (pl[pluginType][key]){
             let absPlugin:AbstractSteroidPlugin = pl[pluginType][key];
             try {
-                plugInstance = absPlugin.getInstance(steroid);
+                if (parameters)
+                    plugInstance = absPlugin.getInstance(steroid,parameters);
+                else
+                    plugInstance = absPlugin.getInstance(steroid);
             }catch (e){
                 throw {message : `Error creating an instance of plugin ${pluginType}.${key}`  , exception: e}
             }

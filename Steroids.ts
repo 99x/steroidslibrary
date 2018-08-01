@@ -278,17 +278,17 @@ export class Steroid {
         if (!heapObj.database){
             heapObj.database = {
                 relational: function(datastore?:string): IRelationalDatabase {
-                    
                     if (datastore){
                         if (!heapObj.relational_data_stores)
                             heapObj.relational_data_stores = {};
                         if (!heapObj.relational_data_stores[datastore])
-                            heapObj.relational_data_stores = RelationalDatabaseFactory.create(self, datastore);
+                            heapObj.relational_data_stores[datastore] = RelationalDatabaseFactory.create(self, datastore);
+                        
+                            return heapObj.relational_data_stores[datastore];
                     }else {
                         heapObj.relational_db = RelationalDatabaseFactory.create(self);
+                        return heapObj.relational_db;
                     }
-                       
-                    return heapObj.relational_db;
                 },
                 cache: function(): ICacheDatabase {
                     return undefined;

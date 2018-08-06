@@ -16,7 +16,7 @@ export class DeleteOps {
 
         for (let i=0;i<obj.length;i++){
             let cobj = obj[i];
-            
+            if (cobj)
             for(let k=0;k<fields.length;k++)
                 if (cobj[fields[k]] !== undefined)
                     delete cobj[fields[k]];

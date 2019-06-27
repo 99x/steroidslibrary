@@ -8,6 +8,7 @@ export interface IEvent
     httpMethod:string;
     headers:any;
     body:any;
+    files?:any;
     queryStringParameters:any;
 }
 

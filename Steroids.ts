@@ -78,6 +78,7 @@ export class Steroid {
             httpMethod: "GET",
             pathParameters:{},
             body:{},
+            files:{},
             queryStringParameters:{}
         };
         let steroid = new Steroid(event,{},()=>{});
